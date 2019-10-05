@@ -1,0 +1,39 @@
+.auth-section {
+  display: flex;
+  align-items: center;
+
+  &.field-group label {
+    width: 260px;
+    display: inline-block;
+  }
+
+  &__status-feedback {
+    display: inline-block;
+
+    .btn {
+      padding: 10px 30px;
+
+      &:disabled {
+        color: #898989;
+      }
+    }
+
+    > span {
+      display: block;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+  }
+
+  &__success-msg {
+    color: green;
+  }
+
+  &__error-msg {
+    color: red;
+  }
+
+  &__icon {
+    font-weight: bold;
+  }
+}

@@ -1,0 +1,21 @@
+.info-box-container {
+  border: 1px solid #E0DCD8;
+  position: relative;
+  padding: 30px;
+
+  .info-box-title {
+    color: #0f0f7f;
+    font-size: 14px;
+    background: #fff;
+    position: absolute;
+    top: -28px;
+    padding: 0 2px;
+    left: 5px;
+
+    &.centered {
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+  }
+}

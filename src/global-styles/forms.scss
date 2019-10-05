@@ -1,0 +1,31 @@
+.field-group {
+  margin: 10px 0 30px;
+
+  label {
+    width: 300px;
+    display: inline-block;
+  }
+
+  input[type=number] {
+    width: 50px;
+    text-align: right;
+  }
+
+  input[type=checkbox] {
+    margin-right: 5px;
+  }
+
+  &.checkbox-field label {
+    width: auto;
+  }
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {  
+  opacity: 1;
+}
+
+input[type=text],
+input[type=password] {
+  padding: 5px;
+}

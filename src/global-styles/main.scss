@@ -1,0 +1,21 @@
+@import './normalize';
+@import './forms.scss';
+@import './buttons.scss';
+
+body {
+  background-color: #263c6b;
+}
+
+.App {
+  $appMargins: 10%;
+  font-family: sans-serif;
+  position: absolute;
+  top: $appMargins;
+  left: $appMargins;
+  right: $appMargins;
+  bottom: $appMargins;
+  background-color: #D0D0C8;
+  box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.25);
+  display: grid;
+  grid-template-rows: 36px 120px 20px auto;
+}

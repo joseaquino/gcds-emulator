@@ -1,0 +1,29 @@
+.app-window-menu-container {
+  height: 20px;
+  background-color: #D0D0C8;
+  border: 1px solid;
+  padding: 7px 0px;
+  border-top-color: rgba(255, 255, 255, 0.4);
+  border-left-color: rgba(255, 255, 255, 0.4);
+  border-left-color: #898989;
+  border-bottom-color: #898989;
+
+  ul {
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+
+    li {
+      float: left;
+      margin: 0px 10px;
+
+      &:hover {
+        cursor: pointer;
+      }
+
+      span {
+        text-decoration: underline;
+      }
+    }
+  }
+}

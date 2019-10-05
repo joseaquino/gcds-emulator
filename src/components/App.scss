@@ -1,0 +1,35 @@
+#app-header {
+  padding: 40px 40px;
+  background-color: #fff;
+  height: 40px;
+
+  h1 {
+    color: #D84838;
+    margin: 0px;
+    float: left;
+    padding: 0px;
+    font-size: 21px;
+    line-height: 40px;
+    vertical-align: middle;
+  }
+  img {
+    height: 40px;
+    float: right;
+  }
+}
+
+#active-pane-title {
+  color: #0f0f7f;
+  font-size: 14px;
+  text-align: right;
+  margin: 2px 5px 0px 0px;
+  font-weight: bold;
+}
+
+#main-container {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  margin-bottom: 2px;
+  margin-right: 2px;
+  min-height: 0;
+}

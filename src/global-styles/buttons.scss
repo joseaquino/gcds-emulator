@@ -1,0 +1,26 @@
+.btn {
+  padding: 5px 8px;
+  background-color: #dadada;
+  color: #515551;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &-primary {
+    background-color: #4890F8;
+    color: #FFF;
+  }
+
+  &-secondary {
+    background-color: #D84838;
+    color: #FFF;
+  }
+
+  > span.underlined {
+    text-decoration: underline;
+  }
+}
