@@ -1,6 +1,4 @@
 import React, { useState } from "react"
-import Max from "crocks/Max"
-import { put } from "crocks/State"
 
 import chain from "crocks/pointfree/chain"
 import compose from "crocks/helpers/compose"
@@ -17,7 +15,6 @@ import isBoolean from "crocks/predicates/isBoolean"
 import isString from "crocks/predicates/isString"
 import map from "crocks/pointfree/map"
 import mapProps from "crocks/helpers/mapProps"
-import mreduceMap from "crocks/helpers/mreduceMap"
 import option from "crocks/pointfree/option"
 import safe from "crocks/Maybe/safe"
 import tap from "crocks/helpers/tap"
@@ -27,7 +24,6 @@ import InfoBox from "../InfoBox"
 import SettingsModal from "../SettingsModal"
 
 import {
-  getStatePath,
   getStateProp,
   isNotEmpty,
   preventDefault,
@@ -37,6 +33,7 @@ import {
 
 import {
   editNewExclusionRule,
+	initializeState,
   saveRuleBeingEdited,
   updateRuleBeingEdited
 } from "../../data/model/exclusionRules"
@@ -78,33 +75,6 @@ const openModalWindow = () => changeModalStatus(true)
 // closeModalWindow :: () -> State ComponentState ()
 const closeModalWindow = () => changeModalStatus(false)
 
-// initNextRuleId :: () -> State ComponentState ()
-const initNextRuleId = () =>
-  getStatePath(["configs", "exclusionRules"])
-    .map(chain(safe(isNotEmpty)))
-    .map(
-      map(
-        mreduceMap(
-          Max,
-          compose(
-            option(0),
-            getProp("id")
-          )
-        )
-      )
-    )
-    .map(option(0))
-    .chain(setStateProp("nextRuleId"))
-
-// initialState :: () -> ComponentState
-const initialState = constant({
-  nextRuleId: 0,
-  ruleBeingEdited: {},
-  isModalOpen: false,
-  formErrorMsg: "",
-  data: {}
-})
-
 // validateRuleIsNotEmpty :: Object -> Maybe Object
 const validateRuleIsNotEmpty = safe(
   compose(
@@ -114,26 +84,24 @@ const validateRuleIsNotEmpty = safe(
   )
 )
 
+// findById :: Number -> [ExclusionRule] -> ExclusionRule
+const findById = curry(id => find(
+	compose(
+		equals(id),
+		option(""),
+		getProp("id")
+	)
+))
+
 // findLabel :: String -> String -> State ComponentState String
 const findLabel = curry((prop, id) =>
-  getStatePath(["data", prop])
-    .map(
-      chain(
-        find(
-          compose(
-            equals(id),
-            option(""),
-            getProp("id")
-          )
-        )
-      )
-    )
+  getStateProp(prop)
+	.map(chain(
+		findById(id)
+	))
     .map(chain(getProp("label")))
     .map(option(""))
 )
-
-// initializeState :: () -> State ComponentState ()
-const initializeState = () => put(initialState())
 
 /**
  * ==================================================
@@ -145,18 +113,16 @@ const initializeState = () => put(initialState())
  */
 
 const ExclusionRules = ({ data, configs }) => {
-  const [state, setState] = useState(
-    compose(
-      execWith(null),
-      chain(initNextRuleId),
-      chain(_ => setStateProp("configs", configs)),
-      chain(_ => setStateProp("matchTypes", data.exclusionMatchTypes)),
-      chain(_ => setStateProp("exclusionTypes", data.exclusionTypes)),
-      chain(_ => setStateProp("data", data)),
-      chain(_ => setStateProp('exclusionRules', configs.exclusionRules)),
-      initializeState
-    )
-  )
+	const initialState = {
+		matchTypes: data.exclusionMatchTypes,
+		exclusionTypes: data.exclusionTypes,
+		exclusionRules: configs.exclusionRules
+	}
+
+	const [state, setState] = useState(compose(
+		execWith(initialState),
+		initializeState
+	))
 
   console.log("STATE", state)
 
@@ -173,7 +139,7 @@ const ExclusionRules = ({ data, configs }) => {
 
   const findMatchTypeLabel = compose(
     evalWith(state),
-    findLabel("exclusionMatchTypes")
+    findLabel("matchTypes")
   )
 
   const handleRuleChange = compose(
