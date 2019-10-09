@@ -1,14 +1,18 @@
 import Pred from "crocks/Pred"
+import List from 'crocks/List'
 import Max from "crocks/Max"
 
 import append from "ramda/src/append"
+import apply from "ramda/src/apply"
 import applyTo from "crocks/combinators/applyTo"
 import assign from "crocks/helpers/assign"
 import chain from "crocks/pointfree/chain"
 import compose from "crocks/helpers/compose"
+import concat from "crocks/pointfree/concat"
 import constant from "crocks/combinators/constant"
 import converge from "crocks/combinators/converge"
 import curry from "crocks/helpers/curry"
+import dec from "ramda/src/dec"
 import either from "crocks/pointfree/either"
 import findIndex from "ramda/src/findIndex"
 import getProp from "crocks/Maybe/getProp"
@@ -22,8 +26,10 @@ import isNumber from "crocks/predicates/isNumber"
 import isObject from "crocks/predicates/isObject"
 import isString from "crocks/predicates/isString"
 import liftA2 from "crocks/helpers/liftA2"
+import listToArray from "crocks/List/listToArray"
 import map from "crocks/pointfree/map"
 import mapProps from "crocks/helpers/mapProps"
+import move from 'ramda/src/move'
 import mreduceMap from "crocks/helpers/mreduceMap"
 import pick from "crocks/helpers/pick"
 import option from "crocks/pointfree/option"
@@ -36,13 +42,18 @@ import unsetProp from "crocks/helpers/unsetProp"
 import { put } from "crocks/State"
 
 import {
-  assignBy,
-  getState,
-  getStateProp,
-  isNotEmpty,
-  mapStateProp,
-  setStateProp
+	assignBy,
+	getState,
+	getStateProp,
+	isNotEmpty,
+	mapStateProp,
+	setStateProp
 } from "../helpers"
+
+/**
+ * TODO:
+ * [] Create file for list modifiers like find, delete, edit, move, swap, pick,
+ */
 
 // allowedPropsToInitialize :: [String]
 const allowedPropsToInitialize = [
@@ -243,6 +254,43 @@ const initializeNextRuleId = converge(
   identity
 )
 
+// findRuleIndex :: Number -> [ExclusionRule] -> Maybe Number
+const findRuleIndex = curry(id => compose(
+	chain(safe(greaterThanZero)),
+	map(findIndex(propEq("id", id))),
+	safe(constant(isNumber(id)))
+))
+
+// getTargetIndexes :: (Number -> Number) -> Number -> [Number, Number]
+const getTargetIndexes = curry(modifier => compose(
+	listToArray,
+	converge(
+		concat,
+		List,
+		compose(List, modifier)
+	)
+))
+
+// toDestinationIndexes :: Number -> Number -> [Number, Number]
+const toDestinationIndexes = curry(direction =>
+	ifElse(
+		compose(greaterThanZero, constant(direction)),
+		getTargetIndexes(dec),
+		getTargetIndexes(inc)
+	)
+)
+
+// moveRule :: Number -> Number -> [ExclusionRule] -> [ExclusionRule]
+const moveRule = curry((direction, id) => converge(
+	applyTo,
+	identity,
+	compose(
+		either(constant(identity), apply(move)),
+		map(toDestinationIndexes(direction)),
+		findRuleIndex(id)
+	)
+))
+
 // newExclusionRule :: () -> State ExclusionRulesState ()
 export const editNewExclusionRule = compose(
   chain(setRuleBeingEdited),
@@ -290,12 +338,20 @@ export const deleteExclusionRule = id =>
     .map(
       converge(
         liftA2(unsetProp),
-        compose(
-          chain(safe(greaterThanZero)),
-          map(findIndex(propEq("id", id))),
-          safe(constant(isNumber(id)))
-        ),
+        findRuleIndex(id),
         safe(isArray)
       )
     )
     .chain(either(getState, setExclusionRules))
+
+// moveExclusionRuleUp :: Number -> State ExclusionRulesState ()
+export const moveExclusionRuleUp = compose(
+	mapOverExclusionRules,
+	moveRule(1)
+)
+
+// moveExclusionRuleDown :: Number -> State ExclusionRulesState ()
+export const moveExclusionRuleDown = compose(
+	mapOverExclusionRules,
+	moveRule(-1)
+)

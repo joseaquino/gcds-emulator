@@ -20,33 +20,34 @@ import unit from "crocks/helpers/unit"
 import unsetProp from "crocks/helpers/unsetProp"
 
 import {
-  editNewExclusionRule,
-  initializeState,
-  deleteExclusionRule,
+	editNewExclusionRule,
+	initializeState,
+	deleteExclusionRule,
+	moveExclusionRuleDown,
 	moveExclusionRuleUp,
-  saveRuleBeingEdited,
-  updateRuleBeingEdited
+	saveRuleBeingEdited,
+	updateRuleBeingEdited
 } from "./exclusionRules"
 
 /**
  * TODO:
  * [X] Initialization of exclusion rule state
  * [X] Ability to delete an exclusion rule from the list
- * [X] Ability to edit an exclusion rule from the list
- * [] Ability to move up or down an exclusion rule's priority in the list
+ * [] Ability to edit an exclusion rule from the list
+ * [X] Ability to move up or down an exclusion rule's priority in the list
  * [] Validation of exclusion rule and set error messages
  */
 
 const initialState = {
-  nextRuleId: 0,
-  exclusionRules: [],
-  ruleBeingEdited: {
-    id: 8,
-    rule: "An exclusion rule",
-    matchType: "orgUnit",
-    exclusionType: "exactMatch",
-    saved: false
-  }
+	nextRuleId: 0,
+	exclusionRules: [],
+	ruleBeingEdited: {
+		id: 8,
+		rule: "An exclusion rule",
+		matchType: "orgUnit",
+		exclusionType: "exactMatch",
+		saved: false
+	}
 }
 
 const sampleExclusionRules = [
@@ -59,19 +60,19 @@ const sampleExclusionRules = [
   {
     id: 5,
     matchType: "exactMatch",
-    exclusionType: "orgUnit",
+    exclusionType: "groupEmailAddress",
     rule: "Another rule in the list"
   },
   {
     id: 33,
-    matchType: "exactMatch",
-    exclusionType: "orgUnit",
+    matchType: "substringMatch",
+    exclusionType: "resourceId",
     rule: "A different one"
   },
   {
     id: 13,
-    matchType: "exactMatch",
-    exclusionType: "orgUnit",
+    matchType: "regex",
+    exclusionType: "userEmailAddress",
     rule: "Changed it again"
   }
 ]
@@ -574,20 +575,95 @@ describe("Exclusion rules state management functions", () => {
     })
   })
 
-  describe("moveExclusionRuleUp() functionality", () => {
-	  test("It should be a function", () => {
-		expect(isFunction(moveExclusionRuleUp)).toEqual(true)
-	  })
+	describe("moveExclusionRuleUp() functionality", () => {
+		test("It should be a function", () => {
+			expect(isFunction(moveExclusionRuleUp)).toEqual(true)
+		})
 
-	  test("It should return an instance of State when called", () => {
-		  let result = moveExclusionRuleUp()
+		test("It should return an instance of State when called", () => {
+			let result = moveExclusionRuleUp()
 
-		  expect(result.type()).toEqual('State')
-	  })
+			expect(result.type()).toEqual('State')
+		})
 
-    test("It should return the same type of state when executed with a given state", () => {})
-    test("It should move the rule that matches the given ID one index up in the list", () => {})
-    test("If no matches are found, it should return the same exclusion rules unmodified", () => {})
-    test("Only the matching rule and the one before should switched position", () => {})
-  })
+		test("It should return the same type of state when executed with a given state", () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let result = moveExclusionRuleUp().execWith(newState)
+
+			expect(keys(result)).toEqual(keys(newState))
+		})
+
+		test("It should move the rule that matches the given ID one index up in the list", () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let targetIndex = 2
+			let ruleToMove = sampleExclusionRules[targetIndex]
+			let result = moveExclusionRuleUp(ruleToMove.id).execWith(newState)
+
+			expect(result.exclusionRules[targetIndex - 1]).toEqual(newState.exclusionRules[targetIndex])
+		})
+
+		test("If no matches are found, it should return the same exclusion rules unmodified", () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let result = moveExclusionRuleUp(999).execWith(newState)
+
+			expect(result).toHaveProperty('exclusionRules', sampleExclusionRules)
+		})
+
+		test("Only the matching rule and the one before should switched position", () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let result = moveExclusionRuleUp(33).execWith(newState)
+
+			expect(result.exclusionRules[0]).toEqual(newState.exclusionRules[0])
+			expect(result.exclusionRules[1]).toEqual(newState.exclusionRules[2])
+			expect(result.exclusionRules[2]).toEqual(newState.exclusionRules[1])
+			expect(result.exclusionRules[3]).toEqual(newState.exclusionRules[3])
+		})
+	})
+
+	describe('moveExclusionRuleDown() functionatility', () => {
+		test('It should be a function', () => {
+			expect(isFunction(moveExclusionRuleDown)).toEqual(true)
+		})
+
+		test('It should return a State instace when called', () => {
+			let result = moveExclusionRuleDown(99)
+
+			expect(result.type()).toEqual('State')
+		})
+
+		test("It should return the same type of state when executed with a given state", () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let result = moveExclusionRuleDown().execWith(newState)
+
+			expect(keys(result)).toEqual(keys(newState))
+		})
+
+		test("It should move the rule that matches the given ID one index up in the list", () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let targetIndex = 2
+			let ruleToMove = sampleExclusionRules[targetIndex]
+			let result = moveExclusionRuleDown(ruleToMove.id).execWith(newState)
+
+			expect(result.exclusionRules[targetIndex + 1]).toEqual(ruleToMove)
+		})
+
+		test("If no matches are found, it should return the same exclusion rules unmodified", () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let result = moveExclusionRuleDown(999).execWith(newState)
+
+			expect(result).toHaveProperty('exclusionRules', sampleExclusionRules)
+		})
+
+		test("Only the matching rule and the one before should switched position", () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let targetIndex = 2
+			let ruleToMove = sampleExclusionRules[targetIndex]
+			let result = moveExclusionRuleDown(ruleToMove.id).execWith(newState)
+
+			expect(result.exclusionRules[0]).toEqual(newState.exclusionRules[0])
+			expect(result.exclusionRules[1]).toEqual(newState.exclusionRules[1])
+			expect(result.exclusionRules[2]).toEqual(newState.exclusionRules[3])
+			expect(result.exclusionRules[3]).toEqual(newState.exclusionRules[2])
+		})
+	})
 })
