@@ -5,10 +5,8 @@ import compose from "crocks/helpers/compose"
 import constant from "crocks/combinators/constant"
 import curry from "crocks/helpers/curry"
 import either from "crocks/pointfree/either"
-import equals from "crocks/pointfree/equals"
 import evalWith from "crocks/State/evalWith"
 import execWith from "crocks/State/execWith"
-import find from "crocks/Maybe/find"
 import getPath from "crocks/Maybe/getPath"
 import getProp from "crocks/Maybe/getProp"
 import isBoolean from "crocks/predicates/isBoolean"
@@ -24,11 +22,12 @@ import InfoBox from "../InfoBox"
 import SettingsModal from "../SettingsModal"
 
 import {
-  getStateProp,
-  isNotEmpty,
-  preventDefault,
-  safeGetInputVal,
-  setStateProp
+	findById,
+	getStateProp,
+	isNotEmpty,
+	preventDefault,
+	safeGetInputVal,
+	setStateProp
 } from "../../data/helpers"
 
 import {
@@ -83,15 +82,6 @@ const validateRuleIsNotEmpty = safe(
     getProp("rule")
   )
 )
-
-// findById :: Number -> [ExclusionRule] -> ExclusionRule
-const findById = curry(id => find(
-	compose(
-		equals(id),
-		option(""),
-		getProp("id")
-	)
-))
 
 // findLabel :: String -> String -> State ComponentState String
 const findLabel = curry((prop, id) =>

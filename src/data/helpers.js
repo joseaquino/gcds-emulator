@@ -10,6 +10,7 @@ import constant from "crocks/combinators/constant"
 import converge from "crocks/combinators/converge"
 import curry from "crocks/helpers/curry"
 import equals from "crocks/pointfree/equals"
+import find from 'crocks/Maybe/find'
 import flip from "crocks/combinators/flip"
 import getPath from "crocks/Maybe/getPath"
 import getProp from "crocks/Maybe/getProp"
@@ -61,6 +62,15 @@ export const isCheckbox = compose(
   option(""),
   getProp("type")
 )
+
+// findById :: String -> [ExclusionRule] -> ExclusionRule
+export const findById = curry(id => find(
+	compose(
+		equals(id),
+		option(""),
+		getProp("id")
+	)
+))
 
 // getState :: () -> State AppState ()
 export const getState = () => State.get()
