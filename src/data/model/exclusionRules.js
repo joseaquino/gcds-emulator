@@ -43,6 +43,7 @@ import { put } from "crocks/State"
 
 import {
 	assignBy,
+	findById,
 	getState,
 	getStateProp,
 	isNotEmpty,
@@ -355,3 +356,16 @@ export const moveExclusionRuleDown = compose(
 	mapOverExclusionRules,
 	moveRule(-1)
 )
+
+// editExclusionRule :: String -> State ExclusionRulesState ()
+export const editExclusionRule = id =>
+	getExclusionRules()
+		.map(findById(id))
+		.map(map(
+			compose(
+				applyTo(defaultExclusionRule()),
+				assign
+			)
+		))
+		.map(option({}))
+		.chain(setRuleBeingEdited)

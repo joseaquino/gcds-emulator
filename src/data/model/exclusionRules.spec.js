@@ -20,6 +20,7 @@ import unit from "crocks/helpers/unit"
 import unsetProp from "crocks/helpers/unsetProp"
 
 import {
+	editExclusionRule,
 	editNewExclusionRule,
 	initializeState,
 	deleteExclusionRule,
@@ -664,6 +665,56 @@ describe("Exclusion rules state management functions", () => {
 			expect(result.exclusionRules[1]).toEqual(newState.exclusionRules[1])
 			expect(result.exclusionRules[2]).toEqual(newState.exclusionRules[3])
 			expect(result.exclusionRules[3]).toEqual(newState.exclusionRules[2])
+		})
+	})
+
+	describe('editExclusionRule() functionality', () => {
+		test('It should be a function', () => {
+			expect(isFunction(editExclusionRule)).toEqual(true)
+		})
+
+		test('It should return a State instace when called', () => {
+			let result = editExclusionRule(99)
+
+			expect(result.type()).toEqual('State')
+		})
+
+		test("It should return the same type of state when executed with a given state", () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let result = editExclusionRule().execWith(newState)
+
+			expect(keys(result)).toEqual(keys(newState))
+		})
+
+		test('It should set the exclusion rule matching the given ID as the rule being edited', () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let targetID = sampleExclusionRules[2].id
+			let result = editExclusionRule(targetID).execWith(newState)
+
+			expect(result.ruleBeingEdited).toHaveProperty('id', targetID)
+		})
+
+		test('When no exclusion rule mathes the given ID it should set the rule being edited to empty', () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let result = editExclusionRule(999).execWith(newState)
+
+			expect(result.ruleBeingEdited).not.toHaveProperty('id')
+		})
+
+		test('When no ID parameter is given it should not change the rule being edited', () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let result = editExclusionRule().execWith(newState)
+
+			expect(result.ruleBeingEdited).not.toHaveProperty('id')
+		})
+
+		test('The rule being edited should have the same structure as a new rule', () => {
+			let newState = setProp('exclusionRules', sampleExclusionRules, initialState)
+			let targetID = sampleExclusionRules[2].id
+			let newRule = editNewExclusionRule().execWith(newState)
+			let result = editExclusionRule(targetID).execWith(newState)
+
+			expect(keys(newRule.ruleBeingEdited)).toEqual(keys(result.ruleBeingEdited))
 		})
 	})
 })
